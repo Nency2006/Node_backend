@@ -98,7 +98,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
 })
 
-
 const loginUser = asyncHandler(async (req, res) => {
     //steps ::
     // 1. email or pass from frontend
@@ -158,7 +157,6 @@ const loginUser = asyncHandler(async (req, res) => {
     )
     
 })
-
 
 const logOutUser = asyncHandler( async (req, res) => {
     await User.findByIdAndUpdate(
