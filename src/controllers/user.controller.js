@@ -66,14 +66,14 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     if (!avatarLocalPath) {
-        throw new ApiError(400, "Avatar file id requier")
+        throw new ApiError(400, "Avatar file is requier")
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
     if (!avatar) {
-        throw new ApiError(400, "Avatar file id requier")
+        throw new ApiError(400, "Avatar file is requier")
     }
 
     const user = await User.create({
@@ -469,6 +469,8 @@ const getWatchHistory = asyncHandler (async (req, res) =>{
             }
         }
     ])
+    console.log(user);
+        
 
     return res.status(200)
     .json(
