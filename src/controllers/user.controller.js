@@ -10,13 +10,13 @@ import mongoose from "mongoose";
 const gentareAccessAndRefreshTokens = async (userId) => {
     try {
        const user =  await User.findById(userId);
-       const accessToken = user.gentareAccessToken();
+       const accessToken = await user.gentareAccessToken();
        
-       const refreshToken = user.gentareRefreshToken();
+       const refreshToken = await user.gentareRefreshToken();
 
        user.refreshToken = refreshToken;
        
-       //await user.save({ validateBeforeSave: false })
+    //    await user.save({ validateBeforeSave: false })
 
        console.log("user data", user);
        
@@ -166,6 +166,7 @@ const logOutUser = asyncHandler( async (req, res) => {
             $set: {
                 refreshToken: undefined
             }
+            // or $unset : { refreshToken : 1 }
         },
         {
             new : true
@@ -236,12 +237,14 @@ const refreshAccessToken = asyncHandler(async (req, res)=>{
 const changeCurrentUserPassword = asyncHandler( async (req, res) =>{
     const {oldPassword, newPassword} = req.body;
 
-    const user = User.findById(req.user?._id)
+    const user = await User.findById(req.user?._id)
 
-    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+    
+    // const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+    const isPasswordValid = await user.isPasswordCorrect(oldPassword)
 
-    if(!isPasswordCorrect){
-        throw new ApiError(400, "Invalid Password")
+    if(!isPasswordValid){
+        throw new ApiError(401, "invalid user credantial")
     }
 
     user.password = newPassword; 
@@ -384,7 +387,7 @@ const getUserChannelProfile = asyncHandler (async (req, res) =>{
                     $size : "$subscribedTo"
                 },
                 isSubscribed : {
-                    $con : {
+                    $cond : {
                         if : {$in: [req.user?._id, "$subscribers.subscriber"]},
                         then : true,
                         else : false
@@ -471,11 +474,12 @@ const getWatchHistory = asyncHandler (async (req, res) =>{
     .json(
         new ApiResponse(
             200, 
-            user[0].watchHistory,
+            user[0].watchHistory?.length,
             "WatchHistory fetch successfully"
         )
     )
 })
+
 export { 
     registerUser,
     loginUser,
